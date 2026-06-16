@@ -23,6 +23,20 @@ Override project names with:
 - `DOCKER_PROJECT_PROD`
 - `DOCKER_PROJECT_DEV`
 
+## SSH Database Channel
+
+Open a local SSH tunnel to a remote database host:
+
+```bash
+set CHANNEL_SSH_TARGET=user@example.com
+set CHANNEL_LOCAL_PORT=15432
+set CHANNEL_REMOTE_HOST=127.0.0.1
+set CHANNEL_REMOTE_PORT=5432
+npm run server:channel
+```
+
+The default tunnel shape is `15432 -> 127.0.0.1:5432`; set the variables above for your server.
+
 ## GitHub Actions
 
 Release workflows build Android, optionally upload APKs to OSS, update server env version fields, and redeploy server/web/admin on a remote host.

@@ -8,6 +8,7 @@
     "server": "npm --prefix server run start",
     "server:dev": "npm --prefix server run start:dev",
     "server:cloud": "npm --prefix server run start:cloud",
+    "server:channel": "npm --prefix server run channel",
     "web": "npm --prefix web run dev",
     "web:dev": "npm --prefix web run dev:dev",
     "web:cloud": "npm --prefix web run dev:cloud",

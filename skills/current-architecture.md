@@ -77,6 +77,7 @@ Key files:
 ## Deployment
 
 - Docker compose: `server/docker-compose.server-multi.yml`.
+- SSH database tunnel: `npm run server:channel` via `scripts/server-channel.js`.
 - Production workflow: `.github/workflows/android-release.yml`.
 - Development workflow: `.github/workflows/android-release-dev.yml`.
 - APK output: `app/outputs/AppTemplate.apk`.

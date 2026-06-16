@@ -9,7 +9,8 @@
     "test": "node --test src/tests/all.test.js",
     "start": "dotenv -e env/.env.local -- node index.js",
     "start:dev": "dotenv -e env/.env.dev -- node index.js",
-    "start:cloud": "dotenv -e env/.env.cloud -- node index.js"
+    "start:cloud": "dotenv -e env/.env.cloud -- node index.js",
+    "channel": "dotenv -e .env -- node ../scripts/server-channel.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

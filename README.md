@@ -31,6 +31,13 @@ npm run web
 npm run android
 ```
 
+Open an optional SSH database tunnel:
+
+```bash
+set CHANNEL_SSH_TARGET=user@example.com
+npm run server:channel
+```
+
 ## Verification
 
 ```bash

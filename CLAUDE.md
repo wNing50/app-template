@@ -36,6 +36,7 @@ This repository intentionally contains no product-specific business modules. Add
 
 - Production Docker: `npm run docker:redeploy`.
 - Dev Docker: `npm run docker:redeploy:dev`.
+- SSH database tunnel: `npm run server:channel`, configured with `CHANNEL_*` environment variables.
 - Production workflow: `.github/workflows/android-release.yml`.
 - Dev workflow: `.github/workflows/android-release-dev.yml`.
 - Remote paths are configured with repository variables `REMOTE_APP_DIR` and `REMOTE_APP_DIR_DEV`.
