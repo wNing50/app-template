@@ -1,0 +1,3 @@
+﻿display_name: 更新提交文档
+short_description: 同步架构文档并生成中文提交信息
+default_prompt: 根据当前 git 改动，更新 CLAUDE.md 和 skills/current-architecture.md，并给出可直接使用的中文提交标题与说明。

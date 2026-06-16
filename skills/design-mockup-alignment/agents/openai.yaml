@@ -1,0 +1,3 @@
+display_name: Design Mockup Alignment
+short_description: Match UI implementation to a visual design without inventing product behavior.
+default_prompt: Use the design-mockup-alignment skill to implement this screen from the design reference while preserving existing business logic.

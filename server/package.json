@@ -1,0 +1,24 @@
+{
+  "name": "app-template-server",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "prestart": "node scripts/kill-port.js 8888",
+    "prestart:dev": "node scripts/kill-port.js 8889",
+    "prestart:cloud": "node scripts/kill-port.js 8888",
+    "test": "node --test src/tests/all.test.js",
+    "start": "dotenv -e env/.env.local -- node index.js",
+    "start:dev": "dotenv -e env/.env.dev -- node index.js",
+    "start:cloud": "dotenv -e env/.env.cloud -- node index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "dotenv-cli": "^11.0.0"
+  }
+}

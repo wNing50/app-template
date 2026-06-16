@@ -1,0 +1,159 @@
+name: Android Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      skip_build:
+        description: 'Skip Android build/upload and only redeploy prod server/web/admin'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  release-android:
+    runs-on: ubuntu-latest
+    env:
+      WORKFLOW_LOG_RETENTION_DAYS: 7
+      REMOTE_APP_DIR: ${{ vars.REMOTE_APP_DIR || '/opt/app-template' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Resolve release version
+        if: ${{ !inputs.skip_build }}
+        id: app_version
+        run: bash .github/scripts/android-release.sh prod --resolve-only
+
+      - name: Setup Java
+        if: ${{ !inputs.skip_build }}
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Android SDK
+        if: ${{ !inputs.skip_build }}
+        uses: android-actions/setup-android@v3
+
+      - name: Cache Gradle
+        if: ${{ !inputs.skip_build }}
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('app/android/**/*.gradle*', 'app/android/gradle.properties', 'app/android/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Install Android packages
+        if: ${{ !inputs.skip_build }}
+        run: sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0" "ndk;27.1.12297006" "cmake;3.22.1"
+
+      - name: Install app dependencies
+        if: ${{ !inputs.skip_build }}
+        working-directory: app
+        run: npm i
+
+      - name: Make Gradle wrapper executable
+        if: ${{ !inputs.skip_build }}
+        run: chmod +x app/android/gradlew
+
+      - name: Build Android APK
+        if: ${{ !inputs.skip_build }}
+        env:
+          APP_ENV: cloud
+          APP_VERSION: ${{ steps.app_version.outputs.version }}
+        run: npm --prefix app run android:build
+
+      - name: Setup ossutil
+        if: ${{ !inputs.skip_build }}
+        run: |
+          set -euo pipefail
+          curl -L -o ossutil.zip https://gosspublic.alicdn.com/ossutil/1.7.16/ossutil-v1.7.16-linux-amd64.zip
+          unzip -o ossutil.zip
+          chmod +x ossutil-v1.7.16-linux-amd64/ossutil
+          sudo mv ossutil-v1.7.16-linux-amd64/ossutil /usr/local/bin/ossutil
+
+      - name: Release APK
+        if: ${{ !inputs.skip_build }}
+        id: release
+        env:
+          OSS_ACCESS_KEY_ID: ${{ secrets.RELEASE_OSS_ACCESS_KEY_ID }}
+          OSS_ACCESS_KEY_SECRET: ${{ secrets.RELEASE_OSS_ACCESS_KEY_SECRET }}
+          RELEASE_OSS_PUBLIC_BASE_URL: ${{ secrets.RELEASE_OSS_PUBLIC_BASE_URL }}
+        run: bash .github/scripts/android-release.sh prod
+
+      - name: Update prod env and push
+        if: ${{ !inputs.skip_build }}
+        env:
+          APP_VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          python - <<'PY'
+          from pathlib import Path
+          import os
+
+          version = os.environ['APP_VERSION'].strip()
+          env_path = Path('server/.env')
+          text = env_path.read_text(encoding='utf-8') if env_path.exists() else ''
+          lines = text.splitlines()
+          out = []
+          found = False
+          for line in lines:
+            if line.startswith('APP_ANDROID_LATEST_VERSION='):
+              out.append(f'APP_ANDROID_LATEST_VERSION={version}')
+              found = True
+            else:
+              out.append(line)
+          if not found:
+            out.append(f'APP_ANDROID_LATEST_VERSION={version}')
+          env_path.write_text('\n'.join(out) + '\n', encoding='utf-8')
+          PY
+          if git diff --quiet -- server/.env; then
+            echo "no env version changes"
+          else
+            git add server/.env
+            git commit -m "chore: bump prod version to ${APP_VERSION}"
+            git push origin HEAD:master
+          fi
+
+      - name: Redeploy prod server/web/admin
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          port: ${{ secrets.DEPLOY_PORT }}
+          command_timeout: 60m
+          script: |
+            set -e
+            cd "${{ env.REMOTE_APP_DIR }}"
+            git fetch origin && git reset --hard origin/master
+            npm --prefix server i
+            npm run docker:redeploy
+            npm --prefix web i
+            npm --prefix web run build:cloud
+            npm --prefix admin i
+            npm --prefix admin run build:cloud
+
+      - name: Upload release artifacts
+        if: ${{ !inputs.skip_build }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: AppTemplate-release
+          path: app/outputs/AppTemplate.apk
+          retention-days: ${{ env.WORKFLOW_LOG_RETENTION_DAYS }}

@@ -1,0 +1,25 @@
+{
+  "name": "app-template-admin",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --mode localdev",
+    "dev:dev": "vite --mode dev",
+    "dev:cloud": "vite --mode cloud",
+    "build": "vite build",
+    "build:dev": "vite build --mode dev",
+    "build:cloud": "vite build --mode cloud",
+    "preview": "vite preview",
+    "test": "vitest run src/tests/all.test.js --pool forks --isolate false"
+  },
+  "dependencies": {
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
+    "vite": "^6.2.0",
+    "vitest": "^3.0.0"
+  }
+}
