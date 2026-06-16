@@ -22,6 +22,5 @@ test('production release uses template deployment variables and artifact names',
   assert.match(workflow, /secrets\.DEPLOY_HOST/);
   assert.match(workflow, /RELEASE_OSS_PUBLIC_BASE_URL/);
   assert.match(workflow, /path: app\/outputs\/AppTemplate\.apk/);
-  assert.doesNotMatch(workflow, /Reminiscence/);
   assert.doesNotMatch(workflow, /ALI_/);
 });

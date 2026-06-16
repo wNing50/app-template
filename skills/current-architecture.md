@@ -90,6 +90,8 @@ Baseline checks:
 npm run test:server
 npm run test:app
 npm run test:app:typecheck
+npm run test:admin
+npm run test:scripts
 npm --prefix admin run build
 npm --prefix web run build
 ```

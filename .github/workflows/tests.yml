@@ -2,6 +2,11 @@ name: Tests
 
 on:
   workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
 
 jobs:
   test:
@@ -26,11 +31,29 @@ jobs:
       - name: Install server dependencies
         run: npm i --prefix server
 
+      - name: Install admin dependencies
+        run: npm i --prefix admin
+
+      - name: Install web dependencies
+        run: npm i --prefix web
+
       - name: Run app tests
         run: npm run test:app
 
       - name: Run server tests
         run: npm run test:server
 
+      - name: Run admin tests
+        run: npm --prefix admin run test
+
       - name: Run app typecheck
         run: npm run test:app:typecheck
+
+      - name: Run script tests
+        run: npm run test:scripts
+
+      - name: Build admin
+        run: npm --prefix admin run build
+
+      - name: Build web
+        run: npm --prefix web run build

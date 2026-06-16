@@ -1,4 +1,4 @@
-pluginManagement {
+﻿pluginManagement {
   repositories {
     gradlePluginPortal()
     google()
@@ -40,7 +40,7 @@ extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
 }
 expoAutolinking.useExpoModules()
 
-rootProject.name = '拾忆'
+rootProject.name = 'AppTemplate'
 
 expoAutolinking.useExpoVersionCatalog()
 
